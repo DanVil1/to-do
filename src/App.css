@@ -1,69 +1,117 @@
-/* src/App.css */
 .App {
-  max-width: 600px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  text-align: center;
   font-family: Arial, sans-serif;
+  text-align: center;
 }
 
-.todo-input {
-  margin-bottom: 20px;
+.board {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
 }
 
-.todo-input input {
+.column {
+  background: #f5f5f5;
   padding: 10px;
-  width: 70%;
+  border-radius: 4px;
+  width: 32%;
+  min-height: 400px;
+}
+
+.column h2 {
+  margin-top: 0;
+}
+
+.add-task-button {
+  margin-bottom: 10px;
+  padding: 10px 15px;
   font-size: 16px;
-}
-
-.todo-input button {
-  padding: 10px 20px;
-  font-size: 16px;
-  margin-left: 10px;
-}
-
-.filters {
-  margin-bottom: 20px;
-}
-
-.filters button {
-  margin: 0 5px;
-  padding: 8px 16px;
   cursor: pointer;
 }
 
-.filters .active {
-  background-color: #007bff;
-  color: white;
-}
-
-.todo-list {
-  list-style: none;
-  padding: 0;
-}
-
-.todo-item {
+.task-item {
+  background: white;
+  margin-bottom: 10px;
   padding: 10px;
-  border-bottom: 1px solid #ccc;
+  border-radius: 4px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  cursor: grab;
 }
 
-.todo-item span {
-  flex: 1;
-  margin-right: 10px;
+.task-content {
+  text-align: left;
+  flex-grow: 1;
 }
 
-.todo-item .created-at {
+.task-content h3 {
+  margin: 0 0 5px;
+}
+
+.task-content p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.time-info {
   font-size: 12px;
-  color: #666;
-  margin-right: 10px;
+  color: #555;
 }
 
-.todo-item button {
-  margin-left: 5px;
+.delete-button {
+  margin-left: 10px;
   padding: 5px 10px;
   font-size: 14px;
+  cursor: pointer;
+}
+
+/* Dialog Styles */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog {
+  background: white;
+  padding: 20px;
+  border-radius: 4px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.dialog h2 {
+  margin-top: 0;
+}
+
+.dialog form {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog label {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.dialog input,
+.dialog select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
