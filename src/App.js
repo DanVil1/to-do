@@ -1,130 +1,124 @@
-// src/App.js
 import React, { useState, useEffect } from 'react';
-import TodoInput from './components/TodoInput';
-import TodoList from './components/TodoList';
+import Column from './components/Column';
+import TaskDialog from './components/TaskDialog';
 import './App.css';
 
 function App() {
-  // Main state
-  const [todos, setTodos] = useState([]);
-  const [newTodo, setNewTodo] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [editingId, setEditingId] = useState(null);
-  const [editingText, setEditingText] = useState('');
+  const [tasks, setTasks] = useState([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
 
-  // Load todos from localStorage on mount
   useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem('todos')) || [];
-    setTodos(storedTodos);
+    const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    setTasks(storedTasks);
   }, []);
 
-  // Save todos to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
-  // Add a new todo
-  const addTodo = () => {
-    if (newTodo.trim() === '') return;
-    const todo = {
+  const addTask = (taskData) => {
+    const newTask = {
       id: Date.now(),
-      text: newTodo,
-      completed: false,
+      title: taskData.title,
+      project: taskData.project,
+      color: taskData.color, 
+      status: 'todo',      
       createdAt: new Date().toISOString(),
+      startTime: null,
+      endTime: null,
     };
-    setTodos([...todos, todo]);
-    setNewTodo('');
+    setTasks([...tasks, newTask]);
   };
 
-  // Toggle a todo's completed status
-  const toggleTodo = id => {
-    setTodos(
-      todos.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const updateTask = (updatedTask) => {
+    setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task));
   };
 
-  // Delete a todo item
-  const deleteTodo = id => {
-    setTodos(todos.filter(todo => todo.id !== id));
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
   };
 
-  // Start editing a todo
-  const startEditing = (id, text) => {
-    setEditingId(id);
-    setEditingText(text);
+  const handleDrop = (e, newStatus) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData('taskId');
+    setTasks(tasks.map(task => {
+      if (task.id.toString() === taskId) {
+        let updatedTask = { ...task, status: newStatus };
+        if (newStatus === 'in-progress' && !task.startTime) {
+          updatedTask.startTime = new Date().toISOString();
+        }
+        if (newStatus === 'finished' && !task.endTime) {
+          updatedTask.endTime = new Date().toISOString();
+        }
+        return updatedTask;
+      }
+      return task;
+    }));
   };
 
-  // Submit the edit
-  const submitEdit = id => {
-    if (editingText.trim() === '') return;
-    setTodos(
-      todos.map(todo =>
-        todo.id === id ? { ...todo, text: editingText } : todo
-      )
-    );
-    setEditingId(null);
-    setEditingText('');
+  const onDragOver = (e) => {
+    e.preventDefault();
   };
 
-  // Cancel editing
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditingText('');
+  const openNewTaskDialog = () => {
+    setEditingTask(null);
+    setDialogOpen(true);
   };
 
-  // Filter todos based on current filter
-  const filteredTodos = todos.filter(todo => {
-    if (filter === 'active') return !todo.completed;
-    if (filter === 'completed') return todo.completed;
-    return true;
-  });
+  const openEditTaskDialog = (task) => {
+    setEditingTask(task);
+    setDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setEditingTask(null);
+  };
+
+  const tasksTodo = tasks.filter(task => task.status === 'todo');
+  const tasksInProgress = tasks.filter(task => task.status === 'in-progress');
+  const tasksFinished = tasks.filter(task => task.status === 'finished');
 
   return (
     <div className="App">
-      <h1>To‑Do App</h1>
-      {/* Input Component */}
-      <TodoInput
-        newTodo={newTodo}
-        setNewTodo={setNewTodo}
-        addTodo={addTodo}
-      />
-
-      {/* Filter Buttons */}
-      <div className="filters">
-        <button
-          className={filter === 'all' ? 'active' : ''}
-          onClick={() => setFilter('all')}
+      <h1>Task Management Board</h1>
+      <div className="board">
+        <Column 
+          title="To Do" 
+          tasks={tasksTodo} 
+          onDrop={(e) => handleDrop(e, 'todo')}
+          onDragOver={onDragOver}
+          openEditTaskDialog={openEditTaskDialog}
+          deleteTask={deleteTask}
         >
-          All
-        </button>
-        <button
-          className={filter === 'active' ? 'active' : ''}
-          onClick={() => setFilter('active')}
-        >
-          Active
-        </button>
-        <button
-          className={filter === 'completed' ? 'active' : ''}
-          onClick={() => setFilter('completed')}
-        >
-          Completed
-        </button>
+          <button className="add-task-button" onClick={openNewTaskDialog}>Add Task</button>
+        </Column>
+        <Column 
+          title="On Progress" 
+          tasks={tasksInProgress} 
+          onDrop={(e) => handleDrop(e, 'in-progress')}
+          onDragOver={onDragOver}
+          openEditTaskDialog={openEditTaskDialog}
+          deleteTask={deleteTask}
+        />
+        <Column 
+          title="Finished" 
+          tasks={tasksFinished} 
+          onDrop={(e) => handleDrop(e, 'finished')}
+          onDragOver={onDragOver}
+          openEditTaskDialog={openEditTaskDialog}
+          deleteTask={deleteTask}
+        />
       </div>
-
-      {/* Todo List Component */}
-      <TodoList
-        todos={filteredTodos}
-        toggleTodo={toggleTodo}
-        deleteTodo={deleteTodo}
-        startEditing={startEditing}
-        editingId={editingId}
-        editingText={editingText}
-        setEditingText={setEditingText}
-        submitEdit={submitEdit}
-        cancelEdit={cancelEdit}
-      />
+      {dialogOpen && (
+        <TaskDialog 
+          closeDialog={closeDialog}
+          addTask={addTask}
+          updateTask={updateTask}
+          editingTask={editingTask}
+        />
+      )}
     </div>
   );
 }
