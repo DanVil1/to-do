@@ -44,14 +44,12 @@ function App() {
     const taskId = e.dataTransfer.getData('taskId');
     setTasks(tasks.map(task => {
       if (task.id.toString() === taskId) {
-        let updatedTask = { ...task, status: newStatus };
-        if (newStatus === 'in-progress' && !task.startTime) {
-          updatedTask.startTime = new Date().toISOString();
+        if (task.status === 'todo' && newStatus === 'in-progress') {
+          return { ...task, status: newStatus, startTime: new Date().toISOString() };
+        } else if (task.status === 'in-progress' && newStatus === 'finished') {
+          return { ...task, status: newStatus, endTime: new Date().toISOString() };
         }
-        if (newStatus === 'finished' && !task.endTime) {
-          updatedTask.endTime = new Date().toISOString();
-        }
-        return updatedTask;
+        return task;
       }
       return task;
     }));
@@ -82,7 +80,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Task Management Board</h1>
+      <h1>Daily Board</h1>
       <div className="board">
         <Column 
           title="To Do" 
@@ -92,7 +90,7 @@ function App() {
           openEditTaskDialog={openEditTaskDialog}
           deleteTask={deleteTask}
         >
-          <button className="add-task-button" onClick={openNewTaskDialog}>Add Task</button>
+          <button className="add-task-button" onClick={openNewTaskDialog}>+</button>
         </Column>
         <Column 
           title="On Progress" 
