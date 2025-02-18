@@ -22,6 +22,7 @@ const TaskItem = ({ task, openEditTaskDialog, deleteTask }) => {
   return (
     <div
       className="task-item"
+      data-task-id={task.id}
       draggable
       onDragStart={handleDragStart}
       style={{
